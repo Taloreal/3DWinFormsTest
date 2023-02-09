@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3DWinFormsTest", "3DWinFormsTest\3DWinFormsTest.csproj", "{3D91D714-B232-46AB-85F5-79832AD82FE5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D91D714-B232-46AB-85F5-79832AD82FE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D91D714-B232-46AB-85F5-79832AD82FE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D91D714-B232-46AB-85F5-79832AD82FE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D91D714-B232-46AB-85F5-79832AD82FE5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4BDB7535-4F79-4A2D-BB0A-BCFD967E96CA}
+	EndGlobalSection
+EndGlobal
