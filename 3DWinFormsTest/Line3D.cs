@@ -47,8 +47,8 @@ namespace _3DWinFormsTest {
                 start = TranslateVector(GetVector(Verticies[i]));
                 stop = TranslateVector(GetVector(Verticies[i + 1]));
                 DrawLine(ref canvas, 
-                    new DepthPoint(Vector.ToScreenSpace(start), start.Z), 
-                    new DepthPoint(Vector.ToScreenSpace(stop), stop.Z),
+                    new DepthPoint(start.ToScreenSpace(), start.Z), 
+                    new DepthPoint(stop.ToScreenSpace(), stop.Z),
                     clr);
             }
         }

@@ -14,6 +14,10 @@ namespace _3DWinFormsTest {
 
         public Transform3D Transform { get; private set; }
 
+        public bool LinesVisible = true;
+        public bool TrianglesVisible = true;
+        public bool ChildrenVisible = true;
+
         private List<Line3D> _Lines;
         public Line3D[] Lines => _Lines.ToArray();
 
@@ -95,15 +99,25 @@ namespace _3DWinFormsTest {
             after.Y *= Transform.Scale.Y;
             after.Z *= Transform.Scale.Z;
             after += Transform.Position;
-            return after;
+
+            return Parent == null ? after : Parent.TranslateVerticy(after);
         }
 
         public void DrawObject(ref Drawable canvas) {
-            for (int i = 0; i < _Lines.Count; i++) {
-                _Lines[i].DrawLine(ref canvas);
+            if (LinesVisible == true) {
+                for (int i = 0; i < _Lines.Count; i++) {
+                    _Lines[i].DrawLine(ref canvas);
+                }
             }
-            for (int i = 0; i < _Triangles.Count; i++) {
-                _Triangles[i].DrawFilled(ref canvas);
+            if (TrianglesVisible == true) {
+                for (int i = 0; i < _Triangles.Count; i++) {
+                    _Triangles[i].DrawFilled(ref canvas);
+                }
+            }
+            if (ChildrenVisible == true) {
+                for (int i = 0; i < _Children.Count; i++) {
+                    _Children[i].DrawObject(ref canvas);
+                }
             }
         }
 

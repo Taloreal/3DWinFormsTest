@@ -42,6 +42,8 @@ namespace _3DWinFormsTest {
         }
 
         public void DrawPixel(Point pos, uint clr, double depth = 0.0) {
+            if (pos.X < 0 || pos.X >= Surface.Width) { return; }
+            if (pos.Y < 0 || pos.Y >= Surface.Height) { return; }
             if (depth > 0) {
                 if (depth < _Depth[pos.X, pos.Y]) {
                     _Canvas[pos.X, pos.Y] = clr;
@@ -51,18 +53,6 @@ namespace _3DWinFormsTest {
             else {
                 _Canvas[pos.X, pos.Y] = clr;
             }
-            //if (pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height) {
-            //    if (depth > 0) {
-            //        if (_Depth[pos.X, pos.Y] <= 0 || depth < _Depth[pos.X, pos.Y]) {
-            //            _Canvas[pos.X, pos.Y] = clr;
-            //            _Depth[pos.X, pos.Y] = depth;
-            //        }
-            //    }
-            //    else {
-            //        _Canvas[pos.X, pos.Y] = clr;
-            //        _Depth[pos.X, pos.Y] = 0;
-            //    }
-            //}
         }
 
         public void Blit(ref uint[,] src, Rectangle copyArea, Rectangle destArea) {
@@ -152,5 +142,5 @@ namespace _3DWinFormsTest {
             img.UnlockBits(data);
             return img;
         }
-    }
+    } 
 }

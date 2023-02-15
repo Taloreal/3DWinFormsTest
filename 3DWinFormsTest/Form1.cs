@@ -33,8 +33,9 @@ namespace _3DWinFormsTest {
         public Vector CubePosition = new Vector(0, 0.25, 0.5);
 
         public static Drawable Canvas = new Drawable(new Size(800, 600), 255u << 24);
-        public Object3D Grid = new Object3D(null, new Transform3D());
-        public Object3D Cube = new Object3D(null, new Transform3D());
+        public Object3D Camera;
+        public Object3D Grid;
+        public Object3D Cube;
 
         private Bitmap Image = null;
         private Bitmap Buffer = null;
@@ -47,11 +48,19 @@ namespace _3DWinFormsTest {
         private DateTime LastFrame = DateTime.Now;
 
         public Form1() {
+            InitializeObjects();
             SetupGrid();
             SetupCube();
             new Thread(() => DrawWorker()).Start();
             this.DoubleBuffered = true;
             InitializeComponent();
+        }
+
+        private void InitializeObjects() {
+            Camera = new Object3D(null, new Transform3D());
+            Grid = new Object3D(Camera, new Transform3D());
+            Cube = new Object3D(Camera, new Transform3D());
+            Camera.Transform.Position = new Vector(0, 0, 0, 0);
         }
 
         private void DrawWorker() {
@@ -67,8 +76,7 @@ namespace _3DWinFormsTest {
                 }
 
                 // draw
-                Grid.DrawObject(ref Canvas);
-                Cube.DrawObject(ref Canvas);
+                Camera.DrawObject(ref Canvas);
                 Buffer = Canvas.ToBitmap();
                 ImageMutex.WaitOne();
                 Image = Buffer;
@@ -117,40 +125,30 @@ namespace _3DWinFormsTest {
         }
 
         public void SetupCube() {
-            Cube.AddVector(new Vector(-1, -1, -1)); 
-            Cube.AddVector(new Vector(-1, -1,  1)); 
-            Cube.AddVector(new Vector( 1, -1,  1)); 
-            Cube.AddVector(new Vector( 1, -1, -1)); 
-            Cube.AddVector(new Vector(-1,  1, -1)); 
-            Cube.AddVector(new Vector(-1,  1,  1)); 
-            Cube.AddVector(new Vector( 1,  1,  1)); 
-            Cube.AddVector(new Vector( 1,  1, -1)); 
+            // create verticies
+            for (int i = 0; i < 8; i++) {
+                int x = i % 4 < 2       ? -1 : 1;
+                int y = i < 4           ? -1 : 1;
+                int z = (i + 1) % 4 < 2 ? -1 : 1;
+                Cube.AddVector(new Vector(x, y, z));
+            }
 
-            Cube.AddLine(new List<int>() { 0, 1, 2, 3, 0 }, CubeOutlineColor);
-            Cube.AddLine(new List<int>() { 4, 5, 6, 7, 4 }, CubeOutlineColor);
-            Cube.AddLine(new List<int>() { 0, 4 }, CubeOutlineColor);
-            Cube.AddLine(new List<int>() { 1, 5 }, CubeOutlineColor);
-            Cube.AddLine(new List<int>() { 2, 6 }, CubeOutlineColor);
-            Cube.AddLine(new List<int>() { 3, 7 }, CubeOutlineColor);
+            // create outline
+            for (int i = 0; i < 2; i++) {
+                Cube.AddLine(new List<int>() {
+                    (i * 4) + 0, (i * 4) + 1, (i * 4) + 2, (i * 4) + 3, (i * 4) + 0,}, CubeOutlineColor);
+                Cube.AddLine(new List<int>() { i + 0, i + 4 }, CubeOutlineColor);
+                Cube.AddLine(new List<int>() { i + 2, i + 6 }, CubeOutlineColor);
+            }
 
-            //bottom
-            Cube.AddTriangle(0, 1, 3, CubeBottomColor);
-            Cube.AddTriangle(2, 1, 3, CubeBottomColor);
-            //top
-            Cube.AddTriangle(4, 5, 7, CubeTopColor);
-            Cube.AddTriangle(6, 5, 7, CubeTopColor);
-            //left
-            Cube.AddTriangle(5, 1, 6, CubeLeftColor);
-            Cube.AddTriangle(2, 1, 6, CubeLeftColor);
-            //right
-            Cube.AddTriangle(0, 4, 3, CubeRightColor);
-            Cube.AddTriangle(7, 4, 3, CubeRightColor);
-            //front
-            Cube.AddTriangle(0, 1, 5, CubeFrontColor);
-            Cube.AddTriangle(4, 0, 5, CubeFrontColor);
-            //back
-            Cube.AddTriangle(2, 3, 7, CubeBackColor);
-            Cube.AddTriangle(6, 2, 7, CubeBackColor);
+            // create triangles, math is dependent on verticies being in a predetermined order.
+            for (int i = 0; i < 4; i++) {
+                int rl_x = i < 2 ? (i % 2 == 0 ? 0 : 7) : (i % 2 == 0 ? 2 : 5);
+                int fb_x = i < 2 ? (i % 2 == 0 ? 1 : 4) : (i % 2 == 0 ? 3 : 6);
+                Cube.AddTriangle(i * 2,  ((i / 2) * 4) + 1,  ((i / 2) * 4) + 3,  i < 2 ? CubeBottomColor : CubeTopColor);
+                Cube.AddTriangle(rl_x,   4 - ((i / 2) * 3),  3 * ((i / 2) + 1),  i < 2 ? CubeRightColor  : CubeLeftColor);
+                Cube.AddTriangle(fb_x,   ((i / 2) * 2),      ((i / 2) * 2) + 5,  i < 2 ? CubeFrontColor  : CubeBackColor);
+            }
 
             Cube.Transform.Position = CubePosition;
             Cube.Transform.Scale = new Vector(CubeScale, CubeScale, CubeScale, 0);
@@ -160,6 +158,18 @@ namespace _3DWinFormsTest {
             QuitMutex.WaitOne();
             QuitThreads = true;
             QuitMutex.ReleaseMutex();
+        }
+
+        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (Camera != null) {
+                Vector shiftPos = new Vector(0, 0, 0, 0);
+                shiftPos.Z += e.KeyChar == 's' ? 0.01 : 0;
+                shiftPos.Z += e.KeyChar == 'w' ? -0.01 : 0;
+                shiftPos.X += e.KeyChar == 'a' ? 0.01 : 0;
+                shiftPos.X += e.KeyChar == 'd' ? -0.01 : 0;
+                Camera.Transform.Position += shiftPos;
+            }
         }
     }
 }

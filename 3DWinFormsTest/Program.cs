@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -12,28 +13,13 @@ namespace _3DWinFormsTest {
     public static class Program {
 
         public static double FarZ = 10;
-        public static double NearZ = 0.1;
+        public static double NearZ = 0.01;
 
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main() {
-
-
-            //Matrix m1 = new Matrix(3);
-            //m1.SetRow(0, new double[] { 2, 4, 1 });
-            //m1.SetRow(1, new double[] { 2, 3, 9 });
-            //m1.SetRow(2, new double[] { 3, 1, 8 });
-
-            //Matrix m2 = new Matrix(3);
-            //m2.SetRow(0, new double[] { 1, 2, 3 });
-            //m2.SetRow(1, new double[] { 3, 6, 1 });
-            //m2.SetRow(2, new double[] { 2, 4, 7 });
-            //
-            //Vector vec = new Vector(3, 7, 5);
-            //Vector result = m1 * vec;
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

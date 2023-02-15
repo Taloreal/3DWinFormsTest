@@ -41,12 +41,19 @@ namespace _3DWinFormsTest {
 
             int xStart = pivots[0].X < pivots[1].X ? pivots[0].X : pivots[1].X;
             xStart = xStart < pivots[2].X ? xStart : pivots[2].X;
+            
             int xStop = pivots[0].X > pivots[1].X ? pivots[0].X : pivots[1].X;
             xStop = xStop > pivots[2].X ? xStop : pivots[2].X;
             int yStart = pivots[0].Y < pivots[1].Y ? pivots[0].Y : pivots[1].Y;
             yStart = yStart < pivots[2].Y ? yStart : pivots[2].Y;
             int yStop = pivots[0].Y > pivots[1].Y ? pivots[0].Y : pivots[1].Y;
             yStop = yStop > pivots[2].Y ? yStop : pivots[2].Y;
+
+            Vector[] vectors = {
+                TranslateVector(GetVector(Verticies[0])),
+                TranslateVector(GetVector(Verticies[1])),
+                TranslateVector(GetVector(Verticies[2])),
+            };
 
             for (int y = yStart; y <= yStop; y++) {
                 for (int x = xStart; x <= xStop; x++) {
@@ -55,10 +62,14 @@ namespace _3DWinFormsTest {
                     if (bary.X < 0 || bary.X > 1) { continue; }
                     if (bary.Y < 0 || bary.Y > 1) { continue; }
                     if (bary.Z < 0 || bary.Z > 1) { continue; }
-                    double depth = GetZInterpolation(bary);
+                    double depth = GetZInterpolation(vectors, bary);
                     canvas.DrawPixel(new Point(x, y), clr, depth);
                 }
             }
+        }
+
+        private double GetZInterpolation(Vector[] vectors, Vector v) {
+            return (vectors[0].Z * v.Z) + (vectors[1].Z * v.X) + (vectors[2].Z * v.Y);
         }
 
         private double GetZInterpolation(Vector p) {
@@ -87,17 +98,17 @@ namespace _3DWinFormsTest {
 
         private Point[] GetScreenPoints() {
             Point[] pivs = new Point[3];
-            pivs[0] = Vector.ToScreenSpace(TranslateVector(GetVector(Verticies[0])));
-            pivs[1] = Vector.ToScreenSpace(TranslateVector(GetVector(Verticies[1])));
-            pivs[2] = Vector.ToScreenSpace(TranslateVector(GetVector(Verticies[2])));
+            pivs[0] = TranslateVector(GetVector(Verticies[0])).ToScreenSpace();
+            pivs[1] = TranslateVector(GetVector(Verticies[1])).ToScreenSpace();
+            pivs[2] = TranslateVector(GetVector(Verticies[2])).ToScreenSpace();
             return pivs;
         }
 
         private Vector[] GetScreenPositions() {
             Vector[] verts = new Vector[3];
-            verts[0] = Vector.ToScreenVector(TranslateVector(GetVector(Verticies[0])));
-            verts[1] = Vector.ToScreenVector(TranslateVector(GetVector(Verticies[1])));
-            verts[2] = Vector.ToScreenVector(TranslateVector(GetVector(Verticies[2])));
+            verts[0] = TranslateVector(GetVector(Verticies[0])).ToScreenVector();
+            verts[1] = TranslateVector(GetVector(Verticies[1])).ToScreenVector();
+            verts[2] = TranslateVector(GetVector(Verticies[2])).ToScreenVector();
             return verts;
         }
 

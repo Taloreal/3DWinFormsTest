@@ -10,26 +10,48 @@ namespace _3DWinFormsTest {
 
     public class Vector {
 
+        private bool HasChanged = true;
+        private Point CachedScreenPoint;
+        private Vector CachedScreenVector;
         private double[] Values = { 0.0, 0.0, 0.0, 0.0 };
 
         public double X { 
             get => Values[0]; 
-            set => Values[0] = value;
+            set { 
+                Values[0] = value; 
+                HasChanged = true;
+            }
         }
 
         public double Y { 
-            get => Values[1]; 
-            set => Values[1] = value; 
+            get => Values[1];
+            set { 
+                Values[1] = value; 
+                HasChanged = true;
+            }
         }
 
         public double Z { 
             get => Values[2];
-            set => Values[2] = value;
+            set {
+                Values[2] = value;
+                HasChanged = true;
+            }
         }
 
         public double W { 
             get => Values[3];
-            set => Values[3] = value;
+            set {
+                Values[3] = value;
+                HasChanged = true;
+            }
+        }
+
+        public Vector(Vector toCopy) { 
+            X = toCopy.X;
+            Y = toCopy.Y;
+            Z = toCopy.Z;
+            W = toCopy.W;
         }
 
         public Vector(double x = 0.0, double y = 0.0, double z = 0.0, double w = 0.0) {
@@ -93,22 +115,31 @@ namespace _3DWinFormsTest {
             return !(left == right);
         }
 
-        public static Point ToScreenSpace(Vector vector) { 
-            Vector coords = ToScreenVector(vector);
-            return new Point((int)coords.X, (int)coords.Y);
+        public Point ToScreenSpace() {
+            if (HasChanged == true) {
+                Vector coords = this.ToScreenVector();
+                CachedScreenPoint = new Point((int)coords.X, (int)coords.Y);
+                this.HasChanged = false;
+            }
+            return CachedScreenPoint;
         }
 
-        public static Vector ToScreenVector(Vector vector) { 
-            Point boundary = new Point(4, 4);
-            Matrix camera = Matrix.View.GetFastInverse();
-            vector = camera * vector;
-            vector += new Vector(Matrix.Projection[3.Get2D(boundary)],
-                Matrix.Projection[7.Get2D(boundary)], Matrix.Projection[11.Get2D(boundary)]);
-            vector = Matrix.Projection * vector;
-            vector /= vector.W;
-            vector.X = (vector.X + 1) / 2 * Form1.Canvas.Surface.Width;
-            vector.Y = (1 - vector.Y) / 2 * Form1.Canvas.Surface.Height;
-            return vector;
+        public Vector ToScreenVector() {
+            if (HasChanged == true) {
+                Vector vector = new Vector(this);
+                Point boundary = new Point(4, 4);
+                Matrix camera = Matrix.View.GetFastInverse();
+                vector = camera * vector;
+                vector += new Vector(Matrix.Projection[3.Get2D(boundary)],
+                    Matrix.Projection[7.Get2D(boundary)], Matrix.Projection[11.Get2D(boundary)]);
+                vector = Matrix.Projection * vector;
+                vector /= vector.W;
+                vector.X = (vector.X + 1) / 2 * Form1.Canvas.Surface.Width;
+                vector.Y = (1 - vector.Y) / 2 * Form1.Canvas.Surface.Height;
+                CachedScreenVector = vector;
+                this.HasChanged = false;
+            }
+            return CachedScreenVector;
         }
 
     }
