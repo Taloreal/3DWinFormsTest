@@ -66,8 +66,8 @@ namespace _3DWinFormsTest {
             for (int i = 0; i < total; i++) {
                 ratio = i / (double)total;
                 Point position = new Point(
-                    (int)((end.Position.X - start.Position.X) * ratio + start.Position.X + 0.5f),
-                    (int)((end.Position.Y - start.Position.Y) * ratio + start.Position.Y + 0.5f));
+                    (int)((end.Position.X - start.Position.X) * ratio + start.Position.X /*+ 0.5f*/),
+                    (int)((end.Position.Y - start.Position.Y) * ratio + start.Position.Y /*+ 0.5f*/));
                 double depth = ((maxdepth - mindepth) * ratio) + mindepth;
                 canvas.DrawPixel(position, clr, depth);
             }

@@ -36,18 +36,25 @@ namespace _3DWinFormsTest {
             if (clr == 0) { 
                 clr = DefaultClr;
             }
-            Point[] pivots = GetScreenPoints();
+            Point[] pts = GetScreenPoints();
+            //Vector[] normal = { 
+            //    TranslateVector(GetVector(Verticies[0])),
+            //    TranslateVector(GetVector(Verticies[1])),
+            //    TranslateVector(GetVector(Verticies[2])), };
             Vector[] asVerts = GetScreenPositions();
 
-            int xStart = pivots[0].X < pivots[1].X ? pivots[0].X : pivots[1].X;
-            xStart = xStart < pivots[2].X ? xStart : pivots[2].X;
-            
-            int xStop = pivots[0].X > pivots[1].X ? pivots[0].X : pivots[1].X;
-            xStop = xStop > pivots[2].X ? xStop : pivots[2].X;
-            int yStart = pivots[0].Y < pivots[1].Y ? pivots[0].Y : pivots[1].Y;
-            yStart = yStart < pivots[2].Y ? yStart : pivots[2].Y;
-            int yStop = pivots[0].Y > pivots[1].Y ? pivots[0].Y : pivots[1].Y;
-            yStop = yStop > pivots[2].Y ? yStop : pivots[2].Y;
+            int xStart = pts[0].X < pts[1].X ? pts[0].X : pts[1].X;
+            xStart = xStart < pts[2].X ? xStart : pts[2].X;
+            xStart = xStart.Clamp(0, Form1.Canvas.Width - 1);
+            int xStop = pts[0].X > pts[1].X ? pts[0].X : pts[1].X;
+            xStop = xStop > pts[2].X ? xStop : pts[2].X;
+            xStop = xStop.Clamp(0, Form1.Canvas.Width - 1);
+            int yStart = pts[0].Y < pts[1].Y ? pts[0].Y : pts[1].Y;
+            yStart = yStart < pts[2].Y ? yStart : pts[2].Y;
+            yStart = yStart.Clamp(0, Form1.Canvas.Height - 1);
+            int yStop = pts[0].Y > pts[1].Y ? pts[0].Y : pts[1].Y;
+            yStop = yStop > pts[2].Y ? yStop : pts[2].Y;
+            yStop = yStop.Clamp(0, Form1.Canvas.Height - 1);
 
             Vector[] vectors = {
                 TranslateVector(GetVector(Verticies[0])),
@@ -57,20 +64,34 @@ namespace _3DWinFormsTest {
 
             for (int y = yStart; y <= yStop; y++) {
                 for (int x = xStart; x <= xStop; x++) {
+                    Point pos = new Point(x, y);
+                    //if (QuickZCheck(asVerts, pos) == false) { continue; }
+                    //if (QuickZCheck(vectors, pos) == false) { continue; }
                     Vector p = new Vector(x, y, 0, 0);
                     Vector bary = GetBary(asVerts[0], asVerts[1], asVerts[2], p);
                     if (bary.X < 0 || bary.X > 1) { continue; }
                     if (bary.Y < 0 || bary.Y > 1) { continue; }
                     if (bary.Z < 0 || bary.Z > 1) { continue; }
+                    ///double depth = GetZInterpolation(asVerts, bary);
                     double depth = GetZInterpolation(vectors, bary);
                     canvas.DrawPixel(new Point(x, y), clr, depth);
                 }
             }
         }
 
+        private bool QuickZCheck(Vector[] vectors, Point pos) { 
+            double depth = Form1.Canvas.Depth[pos.X, pos.Y];
+            return Math.Abs(vectors[0].Z) < depth || Math.Abs(vectors[1].Z) < depth || Math.Abs(vectors[2].Z) < depth;
+        }
+
         private double GetZInterpolation(Vector[] vectors, Vector v) {
             return (vectors[0].Z * v.Z) + (vectors[1].Z * v.X) + (vectors[2].Z * v.Y);
         }
+
+        //private double GetZInterpolation(Vector[] vectors, Vector v) {
+        //    return ((1.0 / vectors[0].Z) * v.Z) + ((1.0 / vectors[1].Z) * v.X) + ((1.0 / vectors[2].Z) * v.Y);
+        //}
+
 
         private double GetZInterpolation(Vector p) {
             return (TranslateVector(GetVector(Verticies[0])).Z * p.Z) + 

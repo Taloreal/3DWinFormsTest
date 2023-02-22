@@ -99,7 +99,6 @@ namespace _3DWinFormsTest {
             after.Y *= Transform.Scale.Y;
             after.Z *= Transform.Scale.Z;
             after += Transform.Position;
-
             return Parent == null ? after : Parent.TranslateVerticy(after);
         }
 

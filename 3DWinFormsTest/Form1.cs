@@ -26,16 +26,19 @@ namespace _3DWinFormsTest {
         public uint CubeFrontColor      = 0xff0000ff;
         public uint CubeBackColor       = 0xff00ffff;
 
+        public bool RotateCube = true;
         public double CubeScale = 0.25;
         public DateTime LastRotation = DateTime.Now;
         public double RotationAngle = 5;
         public double RotationDelta = 1000 /*ms*/ / 30; /*target fps*/ 
-        public Vector CubePosition = new Vector(0, 0.25, 0.5);
+        public Vector CubePosition = new Vector(0, 0.25, 1);
 
         public static Drawable Canvas = new Drawable(new Size(800, 600), 255u << 24);
         public Object3D Camera;
         public Object3D Grid;
         public Object3D Cube;
+
+        public Object3D Axis;
 
         private Bitmap Image = null;
         private Bitmap Buffer = null;
@@ -44,6 +47,9 @@ namespace _3DWinFormsTest {
         private Mutex QuitMutex = new Mutex();
         private Mutex ImageMutex = new Mutex();
 
+        private double MovementSensitivity = 1;
+        private double RotationSensitivity = 150;
+
         private double FPSCount = 0;
         private DateTime LastFrame = DateTime.Now;
 
@@ -51,15 +57,29 @@ namespace _3DWinFormsTest {
             InitializeObjects();
             SetupGrid();
             SetupCube();
+            SetupAxis();
             new Thread(() => DrawWorker()).Start();
             this.DoubleBuffered = true;
             InitializeComponent();
+        }
+
+        private void SetupAxis() {
+            Axis.AddVector(new Vector(-.75, 0, 0)); // 0
+            Axis.AddVector(new Vector(0.75, 0, 0)); // 1
+            Axis.AddLine(new List<int>() { 0, 1 }, CubeOutlineColor);
+            Axis.AddVector(new Vector(0, -.75, 0)); // 2
+            Axis.AddVector(new Vector(0, 0.75, 0)); // 3
+            Axis.AddLine(new List<int>() { 2, 3 }, CubeOutlineColor);
+            Axis.AddVector(new Vector(0, 0, -.75)); // 4
+            Axis.AddVector(new Vector(0, 0, 0.75)); // 5
+            Axis.AddLine(new List<int>() { 4, 5 }, CubeOutlineColor);
         }
 
         private void InitializeObjects() {
             Camera = new Object3D(null, new Transform3D());
             Grid = new Object3D(Camera, new Transform3D());
             Cube = new Object3D(Camera, new Transform3D());
+            Axis = new Object3D(Camera, new Transform3D());
             Camera.Transform.Position = new Vector(0, 0, 0, 0);
         }
 
@@ -70,9 +90,11 @@ namespace _3DWinFormsTest {
 
                 // preprocessing
                 Canvas.FillDrawable(BGroundColor);
-                if ((DateTime.Now - LastRotation).TotalMilliseconds > RotationDelta) {
-                    Cube.Transform.Rotation.Y = (Cube.Transform.Rotation.Y + RotationAngle) % 360;
-                    LastRotation = DateTime.Now;
+                if (RotateCube == true) { 
+                    if ((DateTime.Now - LastRotation).TotalMilliseconds > RotationDelta) {
+                        Cube.Transform.Rotation.Y = (Cube.Transform.Rotation.Y + RotationAngle) % 360;
+                        LastRotation = DateTime.Now;
+                    }
                 }
 
                 // draw
@@ -83,7 +105,7 @@ namespace _3DWinFormsTest {
                 ImageMutex.ReleaseMutex();
 
                 FPSMutex.WaitOne();
-                FPSCount = 1000 / (DateTime.Now - LastRotation).TotalMilliseconds;
+                FPSCount = 1000 / (DateTime.Now - LastFrame).TotalMilliseconds;
                 FPSMutex.ReleaseMutex();
                 LastFrame = DateTime.Now;
 
@@ -95,6 +117,10 @@ namespace _3DWinFormsTest {
         private void timer1_Tick(object sender, EventArgs e) {
             ImageMutex.WaitOne();
             this.BackgroundImage = Image;
+            label1.Text = "Position: " + 
+                Camera.Transform.Position.X + ", " +
+                Camera.Transform.Position.Y + ", " +
+                Camera.Transform.Position.Z;
             ImageMutex.ReleaseMutex();
             FPSMutex.WaitOne();
             this.Text = "Form1: " + ((int)FPSCount).ToString() + " fps";
@@ -102,6 +128,7 @@ namespace _3DWinFormsTest {
         }
 
         public void SetupGrid() {
+            //Grid.LinesVisible = false;
             for (double x = -0.5; x <= 0.5; x += 0.1) {
                 Grid.AddVector(new Vector(-.5, 0, Math.Round(x, 3))); // 0 - 10
             }
@@ -122,9 +149,11 @@ namespace _3DWinFormsTest {
                 Grid.AddLine(new List<int>() { 22 + i, 31 + i }, GridColor);
             }
             Grid.AddLine(new List<int>() { 11, 21 }, GridColor);
+            //Grid.LinesVisible = false;
         }
 
         public void SetupCube() {
+
             // create verticies
             for (int i = 0; i < 8; i++) {
                 int x = i % 4 < 2       ? -1 : 1;
@@ -151,6 +180,7 @@ namespace _3DWinFormsTest {
             }
 
             Cube.Transform.Position = CubePosition;
+            //Cube.Transform.Rotation = new Vector(40, -40, 0);
             Cube.Transform.Scale = new Vector(CubeScale, CubeScale, CubeScale, 0);
         }
 
@@ -170,6 +200,10 @@ namespace _3DWinFormsTest {
                 shiftPos.X += e.KeyChar == 'd' ? -0.01 : 0;
                 Camera.Transform.Position += shiftPos;
             }
+        }
+
+        private void Form1_KeyUp(object sender, KeyEventArgs e) {
+
         }
     }
 }

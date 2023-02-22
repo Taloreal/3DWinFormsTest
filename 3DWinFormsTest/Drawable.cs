@@ -36,22 +36,35 @@ namespace _3DWinFormsTest {
             for (int x = 0; x < Width; x++) {
                 for (int y = 0; y < Height; y++) {
                     _Canvas[x, y] = clr;
-                    _Depth[x, y] = Program.FarZ;
+                    _Depth[x, y] = double.MaxValue;
                 }
             }
         }
 
-        public void DrawPixel(Point pos, uint clr, double depth = 0.0) {
+        public void DrawPixel(Point pos, uint clr, double depth = double.MinValue) {
             if (pos.X < 0 || pos.X >= Surface.Width) { return; }
             if (pos.Y < 0 || pos.Y >= Surface.Height) { return; }
-            if (depth > 0) {
+            depth = Math.Abs(depth);
+            if (depth != double.MinValue) {
                 if (depth < _Depth[pos.X, pos.Y]) {
+                    //uint ignore = 0xff000000;
+                    //if (clr != ignore) {
+                    //    uint offclr = 0;
+                    //    for (int x = -1; x < 2; x++) {
+                    //        for (int y = -1; y < 2; y++) {
+                    //            if (x == 0 && y == 0) { continue; }
+                    //            if (_Canvas[x, y] == ignore) { continue; }
+                    //            offclr += 1;
+                    //        }
+                    //    }
+                    //}
                     _Canvas[pos.X, pos.Y] = clr;
                     _Depth[pos.X, pos.Y] = depth;
                 }
             }
             else {
                 _Canvas[pos.X, pos.Y] = clr;
+                _Depth[pos.X, pos.Y] = double.MaxValue;
             }
         }
 

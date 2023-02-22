@@ -10,7 +10,8 @@ namespace _3DWinFormsTest {
 
     public class Matrix {
 
-        public const double FoV_Degrees = 90.0;
+        public const double FoV_Degrees = 45.0;
+        //public const double FoV_Degrees = 90.0;
         public const double ToRads = Math.PI / 180.0;
         public const double FoV_Radians = FoV_Degrees * ToRads;
 
@@ -32,15 +33,21 @@ namespace _3DWinFormsTest {
             View[9.Get2D(bounds)] = Math.Sin((0 - 18) * ToRads);
             View[10.Get2D(bounds)] = Math.Cos((0 - 18) * ToRads);
             View[15.Get2D(bounds)] = 1;
+            Matrix trans = new Matrix(4, true);
+            trans[14.Get2D(bounds)] = 1;
+            View = trans * View;
+            Matrix InverseView = View.GetFastInverse();
+
             double aspect = (Form1.Canvas.Width / drawRatio) / Form1.Canvas.Height;
             Projection.SetIdentity();
-            double yscale = 1.0 / Math.Tan(FoV_Radians * 0.5);
+            double yscale = 1.0 / Math.Tan(FoV_Radians);
             double xscale = yscale * aspect;
             Projection[0.Get2D(bounds)] = xscale;
             Projection[5.Get2D(bounds)] = yscale;
             Projection[10.Get2D(bounds)] = Program.FarZ / (Program.FarZ - Program.NearZ);
             Projection[11.Get2D(bounds)] = 1.0;
-            Projection[14.Get2D(bounds)] = 0.0 - ((Program.FarZ / Program.NearZ) / (Program.FarZ - Program.NearZ));
+            Projection[14.Get2D(bounds)] = 0.0 - ((Program.FarZ * Program.NearZ) / (Program.FarZ - Program.NearZ));
+            //Projection[14.Get2D(bounds)] = 0.0 - ((Program.FarZ / Program.NearZ) / (Program.FarZ - Program.NearZ));
             Projection[15.Get2D(bounds)] = 0.0;
         }
 
@@ -102,6 +109,7 @@ namespace _3DWinFormsTest {
                 temp[a.Get2D(bounds3)] = this[getter.Get2D(bounds4)];
                 output[setter.Get2D(bounds4)] = this[getter.Get2D(bounds4)];
             }
+            Vector mid = new Vector(this[12.Get2D(bounds4)], this[13.Get2D(bounds4)], this[14.Get2D(bounds4)]);
             Vector vert = temp * new Vector(this[12.Get2D(bounds4)], this[13.Get2D(bounds4)], this[14.Get2D(bounds4)]);
             output[12.Get2D(bounds4)] = 0 - vert.X;
             output[13.Get2D(bounds4)] = 0 - vert.Y;
@@ -161,18 +169,42 @@ namespace _3DWinFormsTest {
         }
 
         public static Matrix operator *(Matrix left, Matrix right) {
-            if (left.Width != right.Height) {
+            int rA = left.Data.GetLength(0);
+            int cA = left.Data.GetLength(1);
+            int rB = right.Data.GetLength(0);
+            int cB = right.Data.GetLength(1);
+
+            if (cA != rB) {
                 throw new Exception("ERROR: Incompatible matrices.");
             }
-            Matrix result = new Matrix(right.Width, left.Height);
-            for (int i = 0; i < left.Height; i++) {
-                for (int j = 0; j < right.Width; j++) {
-                    for (int k = 0; k < right.Height; k++) {
-                        result[j, i] += left[k, i] * right[j, k];
+            double temp = 0;
+            Matrix result = new Matrix(rA, cB);
+
+            for (int i = 0; i < rA; i++)
+            {
+                for (int j = 0; j < cB; j++)
+                {
+                    temp = 0;
+                    for (int k = 0; k < cA; k++)
+                    {
+                        temp += left[i, k] * right[k, j];
                     }
+                    result[i, j] = temp;
                 }
             }
             return result;
+            //if (left.Width != right.Height) {
+            //    throw new Exception("ERROR: Incompatible matrices.");
+            //}
+            //Matrix result = new Matrix(right.Width, left.Height);
+            //for (int i = 0; i < left.Height; i++) {
+            //    for (int j = 0; j < right.Width; j++) {
+            //        for (int k = 0; k < right.Height; k++) {
+            //            result[j, i] += left[k, i] * right[j, k];
+            //        }
+            //    }
+            //}
+            //return result;
         }
 
         public static Vector operator *(Matrix left, Vector right) {

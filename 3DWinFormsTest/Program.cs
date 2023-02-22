@@ -13,13 +13,27 @@ namespace _3DWinFormsTest {
     public static class Program {
 
         public static double FarZ = 10;
-        public static double NearZ = 0.01;
+        public static double NearZ = 1;
 
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main() {
+
+            Matrix mat = new Matrix(4, true);
+            mat[1, 1] =  0.309;
+            mat[1, 2] = -0.951;
+            mat[2, 1] =  0.951;
+            mat[2, 2] =  0.309;
+            mat[0, 3] =  7;
+            mat[1, 3] = -2.282;
+            mat[2, 3] =  9.153;
+            Matrix inv = mat.GetFastInverse();
+
+            //Vector vert = new Vector(0, 0.25, 0.5);
+            //Vector screen = vert.ToScreenVector();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
@@ -63,6 +77,12 @@ namespace _3DWinFormsTest {
 
         public static Point GetSize<T>(this T[,] arr) {
             return new Point(arr.GetLength(0), arr.GetLength(1));
+        }
+
+        public static int Clamp(this int val, int min, int max) {
+            int clamped = val < min ? min : val;
+            clamped = clamped > max ? max : clamped;
+            return clamped;
         }
     }
 }
