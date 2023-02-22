@@ -47,17 +47,6 @@ namespace _3DWinFormsTest {
             depth = Math.Abs(depth);
             if (depth != double.MinValue) {
                 if (depth < _Depth[pos.X, pos.Y]) {
-                    //uint ignore = 0xff000000;
-                    //if (clr != ignore) {
-                    //    uint offclr = 0;
-                    //    for (int x = -1; x < 2; x++) {
-                    //        for (int y = -1; y < 2; y++) {
-                    //            if (x == 0 && y == 0) { continue; }
-                    //            if (_Canvas[x, y] == ignore) { continue; }
-                    //            offclr += 1;
-                    //        }
-                    //    }
-                    //}
                     _Canvas[pos.X, pos.Y] = clr;
                     _Depth[pos.X, pos.Y] = depth;
                 }

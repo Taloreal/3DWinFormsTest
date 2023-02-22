@@ -20,20 +20,6 @@ namespace _3DWinFormsTest {
         /// </summary>
         [STAThread]
         static void Main() {
-
-            Matrix mat = new Matrix(4, true);
-            mat[1, 1] =  0.309;
-            mat[1, 2] = -0.951;
-            mat[2, 1] =  0.951;
-            mat[2, 2] =  0.309;
-            mat[0, 3] =  7;
-            mat[1, 3] = -2.282;
-            mat[2, 3] =  9.153;
-            Matrix inv = mat.GetFastInverse();
-
-            //Vector vert = new Vector(0, 0.25, 0.5);
-            //Vector screen = vert.ToScreenVector();
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

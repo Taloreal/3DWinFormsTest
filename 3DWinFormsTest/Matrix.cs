@@ -11,7 +11,6 @@ namespace _3DWinFormsTest {
     public class Matrix {
 
         public const double FoV_Degrees = 45.0;
-        //public const double FoV_Degrees = 90.0;
         public const double ToRads = Math.PI / 180.0;
         public const double FoV_Radians = FoV_Degrees * ToRads;
 
@@ -26,6 +25,7 @@ namespace _3DWinFormsTest {
             Point bounds = new Point(4, 4);
             double drawRatio = ((Form1.Canvas.Width * 1.0) / (Form1.Canvas.Height * 1.0)) *
                 ((Form1.Canvas.Width * 1.0) / (Form1.Canvas.Height * 1.0));
+
             View.ZeroIt();
             View[0.Get2D(bounds)] = 1;
             View[5.Get2D(bounds)] = Math.Cos((0 - 18) * ToRads);
@@ -36,18 +36,17 @@ namespace _3DWinFormsTest {
             Matrix trans = new Matrix(4, true);
             trans[14.Get2D(bounds)] = 1;
             View = trans * View;
-            Matrix InverseView = View.GetFastInverse();
 
             double aspect = (Form1.Canvas.Width / drawRatio) / Form1.Canvas.Height;
             Projection.SetIdentity();
             double yscale = 1.0 / Math.Tan(FoV_Radians);
             double xscale = yscale * aspect;
+
             Projection[0.Get2D(bounds)] = xscale;
             Projection[5.Get2D(bounds)] = yscale;
             Projection[10.Get2D(bounds)] = Program.FarZ / (Program.FarZ - Program.NearZ);
             Projection[11.Get2D(bounds)] = 1.0;
             Projection[14.Get2D(bounds)] = 0.0 - ((Program.FarZ * Program.NearZ) / (Program.FarZ - Program.NearZ));
-            //Projection[14.Get2D(bounds)] = 0.0 - ((Program.FarZ / Program.NearZ) / (Program.FarZ - Program.NearZ));
             Projection[15.Get2D(bounds)] = 0.0;
         }
 
@@ -109,7 +108,6 @@ namespace _3DWinFormsTest {
                 temp[a.Get2D(bounds3)] = this[getter.Get2D(bounds4)];
                 output[setter.Get2D(bounds4)] = this[getter.Get2D(bounds4)];
             }
-            Vector mid = new Vector(this[12.Get2D(bounds4)], this[13.Get2D(bounds4)], this[14.Get2D(bounds4)]);
             Vector vert = temp * new Vector(this[12.Get2D(bounds4)], this[13.Get2D(bounds4)], this[14.Get2D(bounds4)]);
             output[12.Get2D(bounds4)] = 0 - vert.X;
             output[13.Get2D(bounds4)] = 0 - vert.Y;
@@ -179,32 +177,16 @@ namespace _3DWinFormsTest {
             }
             double temp = 0;
             Matrix result = new Matrix(rA, cB);
-
-            for (int i = 0; i < rA; i++)
-            {
-                for (int j = 0; j < cB; j++)
-                {
+            for (int i = 0; i < rA; i++) {
+                for (int j = 0; j < cB; j++) {
                     temp = 0;
-                    for (int k = 0; k < cA; k++)
-                    {
+                    for (int k = 0; k < cA; k++) {
                         temp += left[i, k] * right[k, j];
                     }
                     result[i, j] = temp;
                 }
             }
             return result;
-            //if (left.Width != right.Height) {
-            //    throw new Exception("ERROR: Incompatible matrices.");
-            //}
-            //Matrix result = new Matrix(right.Width, left.Height);
-            //for (int i = 0; i < left.Height; i++) {
-            //    for (int j = 0; j < right.Width; j++) {
-            //        for (int k = 0; k < right.Height; k++) {
-            //            result[j, i] += left[k, i] * right[j, k];
-            //        }
-            //    }
-            //}
-            //return result;
         }
 
         public static Vector operator *(Matrix left, Vector right) {
